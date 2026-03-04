@@ -1,5 +1,5 @@
 /* ============================================================
-   styles.css — Trivia Ruleta
+   styles.css â€” Trivia Ruleta
    ============================================================ */
 
 * {
@@ -47,7 +47,7 @@ body {
     justify-content: center;
 }
 
-/* ── Screens ── */
+/* â”€â”€ Screens â”€â”€ */
 .screen {
     position: absolute;
     inset: 0;
@@ -55,14 +55,16 @@ body {
     pointer-events: none;
     transition: opacity .25s ease;
     display: flex;
+    overflow: hidden;
 }
 
 .screen.active {
     opacity: 1;
     pointer-events: all;
+    width: 100%;
 }
 
-/* ── Top bar ── */
+/* â”€â”€ Top bar â”€â”€ */
 .top-bar {
     position: fixed;
     top: 0;
@@ -251,11 +253,17 @@ transform: translate(-200%, 0);
 .character_4 {
 
 position: absolute;
+
 bottom: 0;
+
 right: 50%;
+
 z-index: 9;
+
 max-width: 380px;
+
 height: 380px;
+
 transform: translate(170%, -5%);
 }
 
@@ -268,7 +276,7 @@ transform: translate(170%, -5%);
     height: 100%;
 }
 
-/* ── Screen 1 · Ruleta ── */
+/* â”€â”€ Screen 1 Â· Ruleta â”€â”€ */
 #s-roulette {
     flex-direction: column;
     align-items: center;
@@ -383,7 +391,7 @@ transform: translate(170%, -5%);
     opacity: 1;
 }
 
-/* ── Screen 2 · Pregunta ── */
+/* â”€â”€ Screen 2 Â· Pregunta â”€â”€ */
 /*#s-question {
     align-items: center;
     justify-content: center;
@@ -548,7 +556,7 @@ transform: translate(170%, -5%);
     white-space: nowrap;
 }
 
-/* ── Screens 3 & 4 · Resultados ── */
+/* â”€â”€ Screens 3 & 4 Â· Resultados â”€â”€ */
 #s-correct,
 #s-incorrect,
 #s-final,
@@ -659,7 +667,7 @@ display: block;
     color: var(--blue);
 }
 
-/* ── Screen 5 · Final ── */
+/* â”€â”€ Screen 5 Â· Final â”€â”€ */
 .final-card {
 
 text-align: center;
