@@ -27,7 +27,7 @@ const QS = [
     correct:2, exp:"La concentración de Bacillus clausii frente a la severidad del malestar intestinal.Enterogermina presenta: Infant : cólico del lactante 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados 6 Billones: Síntomas severos." },
   { id:3, text:"¿TODOS LOS BACILLUS CLAUSII SON IGUALES?",     
     answers:[
-      "Sí, todos los probióticos que digan “Bacillus clausii” hacen el mismo efecto en el intestino, sin importar el fabricante.",
+      "Sí, todos los probióticos que digan \"Bacillus clausii\" hacen el mismo efecto en el intestino, sin importar el fabricante.",
       "No, aunque te digan lo contrario. Solo Enterogermina con Bacillus clausii y sus 4 cepas específicas tiene evidencia científica de su efectividad, cumple con la cantidad de billones de probióticos que dice su etiqueta y no presenta contaminantes.",
       "Sí. La única diferencia es que cambian el precio dependiendo de la planta donde se producen."
     ],  
@@ -44,7 +44,6 @@ const QS = [
 const COOLDOWN_MS  = 90000;
 const SPIN_DUR_MS  = 3400;
 
-
 // Adjust if your SVG segments don't start at 12 o'clock (0°)
 const OFFSET_DEG   = 0;
 
@@ -59,6 +58,16 @@ let state = {
 };
 
 let wheelDeg = 0;
+
+// ── Drag state ────────────────────────────────────────────────
+let drag = {
+  active:        false,
+  startAngle:    0,
+  startRotation: 0,
+  lastAngle:     0,
+  lastTime:      0,
+  velocityDpMs:  0,   // degrees per millisecond
+};
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -94,29 +103,94 @@ function buildCurvedText() {
   const svg = document.getElementById('curve-svg');
   const txt = "Gira la ruleta para seleccionar tu pregunta";
   const pad = 52, dim = 460 + pad * 2, sc = dim / 2, r = 226 + 26;
+  // viewBox keeps geometry fixed; CSS controls the actual rendered size
+  svg.setAttribute('viewBox', `0 0 ${dim} ${dim}`);
   svg.setAttribute('width',  dim);
   svg.setAttribute('height', dim);
-  svg.style.width  = dim + 'px';
-  svg.style.height = dim + 'px';
+  svg.style.width  = '120%';
+  svg.style.height = '120%';
   svg.innerHTML = `
     <defs>
       <path id="tp" d="M ${sc - r},${sc} A ${r},${r} 0 0,1 ${sc + r},${sc}"/>
     </defs>
-    <text class= "curved-text">
+    <text class="curved-text">
       <textPath href="#tp" startOffset="50%" text-anchor="middle">${txt}</textPath>
     </text>`;
+}
+
+// ── Drag helpers ──────────────────────────────────────────────
+
+function getAngleFromCenter(cx, cy) {
+  const scene = document.querySelector('.roulette-scene');
+  const rect  = scene.getBoundingClientRect();
+  const ox = rect.left + rect.width  / 2;
+  const oy = rect.top  + rect.height / 2;
+  return Math.atan2(cy - oy, cx - ox) * (180 / Math.PI);
+}
+
+function normalizeAngleDiff(d) {
+  while (d >  180) d -= 360;
+  while (d < -180) d += 360;
+  return d;
+}
+
+function initDrag() {
+  const stage = document.getElementById('wheel');
+
+  function pointerDown(e) {
+    e.preventDefault();
+    if (state.spin) return;
+    drag.active        = true;
+    drag.startAngle    = getAngleFromCenter(e.clientX, e.clientY);
+    drag.startRotation = wheelDeg;
+    drag.lastAngle     = drag.startAngle;
+    drag.lastTime      = performance.now();
+    drag.velocityDpMs  = 0;
+    stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
+    stage.style.transition = 'none';
+  }
+
+  function pointerMove(e) {
+    e.preventDefault();
+    if (!drag.active || state.spin) return;
+    const ang  = getAngleFromCenter(e.clientX, e.clientY);
+    const diff = normalizeAngleDiff(ang - drag.startAngle);
+    wheelDeg   = drag.startRotation + diff;
+    stage.style.transform = `translate(-50%,-50%) rotate(${wheelDeg}deg)`;
+
+    const t  = performance.now();
+    const dt = Math.max(1, t - drag.lastTime);
+    drag.velocityDpMs = normalizeAngleDiff(ang - drag.lastAngle) / dt;
+    drag.lastAngle = ang;
+    drag.lastTime  = t;
+  }
+
+  function pointerUp() {
+    if (!drag.active) return;
+    drag.active = false;
+    const v = Math.abs(drag.velocityDpMs) < 0.05 ? 0.9 : drag.velocityDpMs;
+    spinFromVelocity(v);
+  }
+
+  stage.addEventListener('pointerdown',   pointerDown);
+  stage.addEventListener('pointermove',   pointerMove);
+  stage.addEventListener('pointerup',     pointerUp);
+  stage.addEventListener('pointercancel', pointerUp);
 }
 
 // ── Spin ─────────────────────────────────────────────────────
 
 function doSpin() {
+  spinFromVelocity(0.9);
+}
+
+function spinFromVelocity(velocityDpMs) {
   if (state.spin) return;
   const av = availableQuestions();
   if (!av.length) { showFinal(); return; }
 
   state.spin = true;
   document.getElementById('wheel-btn').classList.add('spinning');
-  document.getElementById('smsg').classList.add('show');
   AudioManager.play('spin');
 
   const target    = av[Math.floor(Math.random() * av.length)];
@@ -125,21 +199,34 @@ function doSpin() {
   const segCenter = OFFSET_DEG + idx * sliceDeg + sliceDeg / 2;
   const targetDeg = -segCenter;
 
-  const startDeg    = wheelDeg;
-  const extraSpins  = (6 + Math.floor(Math.random() * 4)) * 360;
+  const startDeg = wheelDeg;
+
+  // Convert drag velocity to travel distance, clamped to 1–5 rotations
+  const rawExtra   = Math.abs(velocityDpMs) * 1800;
+  const extraSpins = Math.min(Math.max(rawExtra, 360), 5 * 360);
+
   const currentNorm = ((startDeg  % 360) + 360) % 360;
   const targetNorm  = ((targetDeg % 360) + 360) % 360;
   let   delta       = targetNorm - currentNorm;
-  if (delta <= 0) delta += 360;
-  const endDeg  = startDeg + extraSpins + delta;
+  // Spin in the direction the drag was going
+  if (velocityDpMs >= 0) {
+    if (delta <= 0) delta += 360;
+  } else {
+    if (delta >= 0) delta -= 360;
+  }
+  const endDeg = startDeg + (velocityDpMs >= 0 ? 1 : -1) * extraSpins + delta;
+
+  // Duration scales with distance so fast flicks feel fast, slow feels slow
+  const spinDur = Math.min(Math.max(extraSpins / 360 * 900, 1200), SPIN_DUR_MS);
 
   const t0      = performance.now();
   const wheelEl = document.getElementById('wheel');
 
-  function ease(t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2; }
+  // Pure ease-out — no ease-in, so it feels like it's already moving
+  function ease(t) { return 1 - Math.pow(1 - t, 3); }
 
   requestAnimationFrame(function tick(now) {
-    const t   = Math.min((now - t0) / SPIN_DUR_MS, 1);
+    const t   = Math.min((now - t0) / spinDur, 1);
     const cur = startDeg + (endDeg - startDeg) * ease(t);
     wheelEl.style.transform = `translate(-50%,-50%) rotate(${cur}deg)`;
 
@@ -150,7 +237,6 @@ function doSpin() {
       wheelEl.style.transform = `translate(-50%,-50%) rotate(${wheelDeg}deg)`;
       state.spin = false;
       document.getElementById('wheel-btn').classList.remove('spinning');
-      document.getElementById('smsg').classList.remove('show');
       AudioManager.stop('spin');
       AudioManager.play('tick');
       state.curQ = target;
@@ -181,6 +267,14 @@ function showQuestion(q) {
   document.getElementById('pbar').style.width = Math.max(8, pct) + '%';
   document.getElementById('plbl').textContent = `${answered + 1} / ${QS.length}`;
   goTo('s-question');
+
+  // ── Question idle: if no answer in 90s, return to home ──
+  clearTimeout(state._questionIdleTimer);
+  state._questionIdleTimer = setTimeout(() => {
+    clearTimeout(state._correctTimer);
+    clearTimeout(state._incorrectTimer);
+    goTo('s-roulette');
+  }, 90000);
 }
 
 function pickAnswer(idx) {
@@ -189,9 +283,26 @@ function pickAnswer(idx) {
   const btns = document.querySelectorAll('.ans-btn');
   btns.forEach(b => b.disabled = true);
 
+  // Cancel question idle timer — player answered
+  clearTimeout(state._questionIdleTimer);
+
   const correct = idx === q.correct;
-  btns[idx].classList.add(correct ? 'correct' : 'wrong');
-  if (!correct) btns[q.correct].classList.add('correct');
+
+  // ── Animate answer feedback ──
+  // rAF ensures browser registers the base state before adding classes
+  requestAnimationFrame(() => {
+    btns[q.correct].classList.add('correct');
+    if (!correct) {
+      btns[idx].classList.add('wrong');
+      btns.forEach((b, i) => {
+        if (i !== idx && i !== q.correct) b.classList.add('dim');
+      });
+    } else {
+      btns.forEach((b, i) => {
+        if (i !== q.correct) b.classList.add('dim');
+      });
+    }
+  });
 
   setTimeout(() => {
     if (correct) {
@@ -227,7 +338,7 @@ function pickAnswer(idx) {
       clearTimeout(state._incorrectTimer);
       state._incorrectTimer = setTimeout(goRoulette, 10000);
     }
-  }, 600);
+  }, 1200);
 }
 
 // ── Navigation ───────────────────────────────────────────────
@@ -236,6 +347,7 @@ function goRoulette() {
   /*updateScoreboard();*/
   clearTimeout(state._incorrectTimer);
   clearTimeout(state._correctTimer);
+  clearTimeout(state._questionIdleTimer);
   goTo('s-roulette');
 }
 
@@ -262,6 +374,7 @@ function toggleSound() {
 function resetGame() {
   clearTimeout(state._correctTimer);
   clearTimeout(state._incorrectTimer);
+  clearTimeout(state._questionIdleTimer);
   state   = { score:{ c:0, w:0 }, done: new Set(), cds:{}, curQ: null, spin: false, correctIdx: 0, incorrectIdx: 0 };
   wheelDeg = 0;
   document.getElementById('wheel').style.transform = 'translate(-50%,-50%) rotate(0deg)';
@@ -275,5 +388,6 @@ function resetGame() {
 document.addEventListener('DOMContentLoaded', () => {
   AudioManager.init();
   buildCurvedText();
+  initDrag();
   /*updateScoreboard();*/
 });

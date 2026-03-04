@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -47,16 +47,15 @@
         <img src="imgs/m_verde.webp" alt="">
     </div>
     
-  <div class="roulette-title">Demuestra tu<br>Conocimiento</div>
+  <div class="roulette-title"><span>Demuestra tu</span><br>Conocimiento</div>
   <div class="roulette-scene">
     <svg class="curved-svg" id="curve-svg"></svg>
-    <img id="wheel" src="imgs/roulette.webp" alt="">       
+    <img id="wheel" src="imgs/roulette.webp" alt="" draggable="false">       
     <div id="wheel-btn" onclick="doSpin()">
        <img src="imgs/roulette-btn.webp" alt="">
        <p>GIRAR</p>
     </div>
 
-    <div class="spin-msg" id="smsg">Eligiendo pregunta...</div>
   </div>
 </div>
 
@@ -111,14 +110,14 @@
     <button class="btn-p" onclick="resetGame()">Jugar de nuevo</button>
   </div>
   <div class="final-msg">
-    <p>Enterogermina está compuesto por las cepas B clausii O/C, SIN, T Y N/R.1. Ghelardi et al. Current progress and future perspectives on the use of bacillus clausii. Microorganisms. 2022; 10: 1246-1262. 2. Lopetuso et al. Exp Rev Gast Hep. 2016; 10(8): 943-948. 3. EnteroInfant® (Bifidobacterium animalis ssp lactis BB-12®) Ecuador. SANOFI. 4. Inserto Enterogermina 2000 millones. 5. Inserto Enterogermina 4000 millones. 6. Inserto Enterogermina 6000 millones. 7. Norris T. What's the connection between probiotics and digestive health? Healthline. Sept 29, 2018. Consultado Ago 2, 2022. Disponible en: <a href="https://www.healthline.com/health/probiotics-and-digestive-health">https://www.healthline.com/health/probiotics-and-digestive-health</a>. Material para uso exclusivo del Representante de Ventas/Médico dirigido al profesional de la salud que prescribe y dispensa. Ver información de prescripción en la ficha técnica adjunto al presente material.  Mayor información a disposición en el Departamento Médico: Opella Healthcare Ecuador S.A.S Centro Corporativo Ekopark , Vía Antigua a Nayón y Av. Simón Bolívar, torre 2, piso 9, código postal EC 170503. Para solicitud, reporte de eventos adversos, quejas técnicas o información médica, escríbenos a:servicioalcliente.opella@sanofi.com tel (593)24016130. ESTE PRODUCTO NO SIRVE PARA EL TRATAMIENTO, CURA O PREVENCIÓN DE ALGUNA ENFERMEDAD. ESTE PRODUCTO ES UN SUPLEMENTO DIETARIO, NO ES UN MEDICAMENTO Y NO SUPLE UNA ALIMENTACIÓN EQUILIBRADA. ENTEROGERMINA® INFANT, notificación sanitaria obligatoria 20055-ALE-1022. Enterogermina Suspensión 2B Registro Sanitario: H7301013. Enterogermina Suspensión 4B Plus Registro Sanitario: 1035-MEE-0615. Enterogermina 6000 millones Registro Sanitario: 6367 MEE-0621. MAT-EC-2600054 V1.0 02/26.</p>
+    <p>Enterogermina está compuesto por las cepas B clausii O/C, SIN, T Y N/R.1. Ghelardi et al. Current progress and future perspectives on the use of bacillus clausii. Microorganisms. 2022; 10: 1246-1262. 2. Lopetuso et al. Exp Rev Gast Hep. 2016; 10(8): 943-948. 3. EnteroInfant® (Bifidobacterium animalis ssp lactis BB-12®) Ecuador. SANOFI. 4. Inserto Enterogermina 2000 millones. 5. Inserto Enterogermina 4000 millones. 6. Inserto Enterogermina 6000 millones. 7. Norris T. What's the connection between probiotics and digestive health? Healthline. Sept 29, 2018. Consultado Ago 2, 2022. Disponible en: https://www.healthline.com/health/probiotics-and-digestive-health">https://www.healthline.com/health/probiotics-and-digestive-health. Material para uso exclusivo del Representante de Ventas/Médico dirigido al profesional de la salud que prescribe y dispensa. Ver información de prescripción en la ficha técnica adjunto al presente material.  Mayor información a disposición en el Departamento Médico: Opella Healthcare Ecuador S.A.S Centro Corporativo Ekopark , Vía Antigua a Nayón y Av. Simón Bolívar, torre 2, piso 9, código postal EC 170503. Para solicitud, reporte de eventos adversos, quejas técnicas o información médica, escríbenos a:servicioalcliente.opella@sanofi.com tel (593)24016130. ESTE PRODUCTO NO SIRVE PARA EL TRATAMIENTO, CURA O PREVENCIÓN DE ALGUNA ENFERMEDAD. ESTE PRODUCTO ES UN SUPLEMENTO DIETARIO, NO ES UN MEDICAMENTO Y NO SUPLE UNA ALIMENTACIÓN EQUILIBRADA. ENTEROGERMINA® INFANT, notificación sanitaria obligatoria 20055-ALE-1022. Enterogermina Suspensión 2B Registro Sanitario: H7301013. Enterogermina Suspensión 4B Plus Registro Sanitario: 1035-MEE-0615. Enterogermina 6000 millones Registro Sanitario: 6367 MEE-0621. MAT-EC-2600054 V1.0 02/26.</p>
    
   </div>
 </div>
 
 <!-- audio.js must load before game.js -->
-<script src="audio.js"></script>
-<script src="game.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
 
 </body>
 </html>
