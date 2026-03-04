@@ -253,17 +253,11 @@ transform: translate(-200%, 0);
 .character_4 {
 
 position: absolute;
-
 bottom: 0;
-
 right: 50%;
-
 z-index: 9;
-
 max-width: 380px;
-
 height: 380px;
-
 transform: translate(170%, -5%);
 }
 
@@ -403,11 +397,11 @@ transform: translate(170%, -5%);
 }*/
 
 .q-card, .res-card {
-    width: 950px;
-    height: 1000px;
+    width: 80vw;
+    height: 80vh;
     background-image: url(imgs/board.webp);
     background-position: center;
-    background-size: contain;
+    background-size: 100% 100%;
     background-repeat: no-repeat;
     border-radius: 12px;
     overflow: hidden;
@@ -750,4 +744,65 @@ color: var(--text-blue);
     text-transform: uppercase;
     color: var(--faint);
     margin-top: 3px;
+}
+
+
+/*---------------------- MEDIA QUERIES -------------------------*/
+
+@media (max-height: 600px) and (orientation: landscape) {
+  /* Common adjustments for all characters */
+  .character_1, .character_2, .character_3, .character_4 {
+    height: 220px; /* Scaled down from 380px */
+    width: auto;   /* Maintain aspect ratio */
+  }
+
+  .character_1 {
+    width: 220px;
+    left: 0;
+    transform: translate(5%, -2%);
+  }
+
+  .character_2 {
+    max-width: 220px;
+    right: 0;
+    transform: translate(-5%, -2%);
+  }
+
+  /* Specific fix for the question state */
+  .character_2.is-question {
+    height: 180px;
+    max-width: 140px;
+    transform: scaleX(-1) translate(-20%, -5px);
+  }
+
+  .character_3 {
+    max-width: 200px;
+    height: 190px;
+    left: 0;
+    transform: translate(5%, 0);
+  }
+
+  .character_4 {
+    max-width: 220px;
+    right: 0;
+    transform: translate(-5%, -2%);
+  }
+
+  .q-body{
+    width: 90%;
+  }
+
+  .q-txt{
+    font-size: 1.5rem;
+  }
+  .roulette-title{
+    font-size: 2.5rem;
+  }
+
+  .roulette-title{
+    font-size: 4rem;
+  }
+  .res-title-incorrect{
+    font-size:3rem;
+  }
 }
