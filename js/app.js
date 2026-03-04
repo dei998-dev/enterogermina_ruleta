@@ -274,7 +274,7 @@ function showQuestion(q) {
     clearTimeout(state._correctTimer);
     clearTimeout(state._incorrectTimer);
     goTo('s-roulette');
-  }, 90000);
+  }, 60000);
 }
 
 function pickAnswer(idx) {
@@ -321,7 +321,7 @@ function pickAnswer(idx) {
       goTo('s-correct');
       // Auto-advance to final screen after 5 seconds
       clearTimeout(state._correctTimer);
-      state._correctTimer = setTimeout(showFinal, 5000);
+      state._correctTimer = setTimeout(showFinal, 8000);
     } else {
       state.score.w++;
       state.cds[q.id] = Date.now() + COOLDOWN_MS;
@@ -336,7 +336,7 @@ function pickAnswer(idx) {
       goTo('s-incorrect');
       // Auto-advance to roulette after 10 seconds
       clearTimeout(state._incorrectTimer);
-      state._incorrectTimer = setTimeout(goRoulette, 10000);
+      state._incorrectTimer = setTimeout(goRoulette, 12000);
     }
   }, 1200);
 }
@@ -354,6 +354,8 @@ function goRoulette() {
 function showFinal() {
   clearTimeout(state._correctTimer);
   clearTimeout(state._incorrectTimer);
+  AudioManager.stop('bg_music');
+  AudioManager.play('final_music');
  /* document.getElementById('f-c').textContent = state.score.c;
   document.getElementById('f-w').textContent = state.score.w;
   document.getElementById('f-t').textContent = totalScore();*/
@@ -375,6 +377,8 @@ function resetGame() {
   clearTimeout(state._correctTimer);
   clearTimeout(state._incorrectTimer);
   clearTimeout(state._questionIdleTimer);
+  AudioManager.stop('final_music');
+  AudioManager.play('bg_music');
   state   = { score:{ c:0, w:0 }, done: new Set(), cds:{}, curQ: null, spin: false, correctIdx: 0, incorrectIdx: 0 };
   wheelDeg = 0;
   document.getElementById('wheel').style.transform = 'translate(-50%,-50%) rotate(0deg)';
@@ -389,5 +393,23 @@ document.addEventListener('DOMContentLoaded', () => {
   AudioManager.init();
   buildCurvedText();
   initDrag();
+
+  // Try autoplay immediately; if blocked (e.g. Safari/iOS), start on first interaction
+  function startBgMusic() {
+    AudioManager.play('bg_music');
+    document.removeEventListener('pointerdown', startBgMusic);
+    document.removeEventListener('keydown', startBgMusic);
+  }
+  const bgNode = AudioManager._node('bg_music');
+  if (bgNode) {
+    bgNode.play().catch(() => {
+      // Autoplay blocked — wait for first user gesture
+      document.addEventListener('pointerdown', startBgMusic);
+      document.addEventListener('keydown', startBgMusic);
+    });
+  } else {
+    document.addEventListener('pointerdown', startBgMusic);
+    document.addEventListener('keydown', startBgMusic);
+  }
   /*updateScoreboard();*/
 });

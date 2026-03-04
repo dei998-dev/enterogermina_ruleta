@@ -1,6 +1,6 @@
 // ============================================================
 //  audio.js — Sound Manager
-//  All audio logic lives here. No audio code in game.js.
+//  
 //
 //  API:
 //    AudioManager.init()         → preload all sounds (call on page load)
@@ -8,17 +8,18 @@
 //    AudioManager.stop('key')    → stop a looping sound
 //    AudioManager.toggleMute()   → toggle on/off, returns new muted state
 //    AudioManager.isMuted()      → returns true/false
+//    AudioManager._node('key')   → returns raw Audio element
 // ============================================================
 
 const AudioManager = (() => {
 
-  // Add or remove sounds here. Use loop:true for continuous sounds.
   const SOUNDS = {
-    spin:    { src: 'audio/spin.mp3',    loop: true,  volume: 0.7 },
-    tick:    { src: 'audio/tick.mp3',    loop: false, volume: 0.6 },
-    correct: { src: 'audio/correct.mp3', loop: false, volume: 1.0 },
-    wrong:   { src: 'audio/wrong.mp3',   loop: false, volume: 1.0 },
-    bgm:     { src: 'audio/bgm.mp3',     loop: true,  volume: 0.3 },
+    spin:        { src: 'audio/spin.wav',        loop: true,  volume: 0.7 },
+    tick:        { src: 'audio/tick.wav',        loop: false, volume: 0.6 },
+    correct:     { src: 'audio/correct.wav',     loop: false, volume: 1.0 },
+    wrong:       { src: 'audio/wrong.wav',       loop: false, volume: 1.0 },
+    bg_music:    { src: 'audio/bg_music.wav',    loop: true,  volume: 0.3 },
+    final_music: { src: 'audio/final_music.wav', loop: false, volume: 1.0 },
   };
 
   let muted = false;
@@ -59,6 +60,8 @@ const AudioManager = (() => {
 
   function isMuted() { return muted; }
 
-  return { init, play, stop, toggleMute, isMuted };
+  function _node(key) { return nodes[key] || null; }
+
+  return { init, play, stop, toggleMute, isMuted, _node };
 
 })();
