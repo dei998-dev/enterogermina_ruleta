@@ -76,14 +76,16 @@ function totalScore() {
 }
 
 function availableQuestions() {
-  const now     = Date.now();
-  const notDone = QS.filter(q => !state.done.has(q.id));
-  if (!notDone.length) return [];
-  const free = notDone.filter(q => !state.cds[q.id] || now >= state.cds[q.id]);
+  const now  = Date.now();
+  const free = QS.filter(q => !state.cds[q.id] || now >= state.cds[q.id]);
   if (free.length) return free;
-  // All on cooldown — return the one expiring soonest
-  notDone.sort((a, b) => (state.cds[a.id] || 0) - (state.cds[b.id] || 0));
-  return [notDone[0]];
+  // All 5 on cooldown — reset all except the last answered question
+  const lastId = state.lastAnsweredId;
+  state.cds = {};
+  if (lastId !== null && lastId !== undefined) {
+    state.cds[lastId] = Date.now() + COOLDOWN_MS;
+  }
+  return QS.filter(q => q.id !== lastId);
 }
 
 function goTo(screenId) {
@@ -287,6 +289,7 @@ function pickAnswer(idx) {
   clearTimeout(state._questionIdleTimer);
 
   const correct = idx === q.correct;
+  state.lastAnsweredId = q.id;
 
   // ── Play audio immediately on answer ──
   if (correct) {
@@ -314,8 +317,7 @@ function pickAnswer(idx) {
   setTimeout(() => {
     if (correct) {
       state.score.c++;
-      state.done.add(q.id);
-      // Apply cooldown so the next person gets a different question
+      // Cooldown only — question returns after 90s for the next rotation
       state.cds[q.id] = Date.now() + COOLDOWN_MS;
       document.getElementById('c-atxt').textContent = q.answers[q.correct];
       document.getElementById('c-exp').textContent  = q.exp;
@@ -325,7 +327,7 @@ function pickAnswer(idx) {
       document.querySelector('.character_3 img').src = `imgs/m_correcto${cNum}.webp`;
       state.correctIdx++;
       goTo('s-correct');
-      // Auto-advance to final screen after 5 seconds
+      // Auto-advance to final screen after 4 seconds
       clearTimeout(state._correctTimer);
       state._correctTimer = setTimeout(showFinal, 4000);
     } else {
@@ -364,6 +366,21 @@ function showFinal() {
   goTo('s-final');
 }
 
+// Called when "Jugar de nuevo" is pressed on the final screen (next player)
+function nextPlayer() {
+  clearTimeout(state._correctTimer);
+  clearTimeout(state._incorrectTimer);
+  clearTimeout(state._questionIdleTimer);
+  AudioManager.stop('final_music');
+  AudioManager.play('bg_music');
+  // Keep cooldowns (state.cds) so recently answered questions stay on cooldown
+  // Only reset per-player state
+  state.score       = { c: 0, w: 0 };
+  state.curQ        = null;
+  state.spin        = false;
+  goTo('s-roulette');
+}
+
 // ── Sound toggle ─────────────────────────────────────────────
 
 function toggleSound() {
@@ -381,7 +398,8 @@ function resetGame() {
   clearTimeout(state._questionIdleTimer);
   AudioManager.stop('final_music');
   AudioManager.play('bg_music');
-  state   = { score:{ c:0, w:0 }, done: new Set(), cds:{}, curQ: null, spin: false, correctIdx: 0, incorrectIdx: 0 };
+  // Full reset — clears cooldowns too
+  state   = { score:{ c:0, w:0 }, done: new Set(), cds:{}, curQ: null, spin: false, correctIdx: 0, incorrectIdx: 0, lastAnsweredId: null };
   wheelDeg = 0;
   document.getElementById('wheel').style.transform = 'translate(-50%,-50%) rotate(0deg)';
   document.getElementById('wheel-btn').classList.remove('spinning');
