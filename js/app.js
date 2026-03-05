@@ -22,9 +22,9 @@ const QS = [
     answers:[
       "Solo la presentación. Ya que todos tienen el mismo efecto en cuanto a malestares intestinales con concentraciones diferentes.",
       "La presentación varía de acuerdo a la edad de la persona que lo va a ingerir.",
-      "La concentración de Bacillus clausii frente a la severidad del malestar intestinal.<br> Enterogermina presenta: Infant : cólico del lactante, 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados, 6 Billones: Síntomas severos."
+      "La concentración de Bacillus clausii frente a la severidad del malestar intestinal.<br> Enterogermina presenta: <br> -Infant: cólico del lactante <br> -2 Billones: Síntomas leves <br> -4 Billones: Síntomas moderados <br> -6 Billones: Síntomas severos."
     ],               
-    correct:2, exp:"La concentración de Bacillus clausii frente a la severidad del malestar intestinal. Enterogermina presenta: Infant : cólico del lactante 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados 6 Billones: Síntomas severos." },
+    correct:2, exp:"La concentración de Bacillus clausii frente a la severidad del malestar intestinal. Enterogermina presenta: Infant: cólico del lactante 2 Billones: Síntomas leves, 4 Billones: Síntomas moderados 6 Billones: Síntomas severos." },
   { id:3, text:"¿TODOS LOS BACILLUS CLAUSII SON IGUALES?",     
     answers:[
       "Sí, todos los probióticos que digan \'Bacillus clausii\'hacen el mismo efecto en el intestino, sin importar el fabricante.",
