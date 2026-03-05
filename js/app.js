@@ -22,13 +22,13 @@ const QS = [
     answers:[
       "Solo la presentación. Ya que todos tienen el mismo efecto en cuanto a malestares intestinales con concentraciones diferentes.",
       "La presentación varía de acuerdo a la edad de la persona que lo va a ingerir.",
-      "La concentración de Bacillus clausii frente a la severidad del malestar intestinal.Enterogermina presenta: Infant : cólico del lactante, 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados, 6 Billones: Síntomas severos."
+      "La concentración de Bacillus clausii frente a la severidad del malestar intestinal.<br> Enterogermina presenta: Infant : cólico del lactante, 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados, 6 Billones: Síntomas severos."
     ],               
-    correct:2, exp:"La concentración de Bacillus clausii frente a la severidad del malestar intestinal.Enterogermina presenta: Infant : cólico del lactante 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados 6 Billones: Síntomas severos." },
+    correct:2, exp:"La concentración de Bacillus clausii frente a la severidad del malestar intestinal. Enterogermina presenta: Infant : cólico del lactante 2 Billones : Síntomas leves, 4 Billones : Síntomas moderados 6 Billones: Síntomas severos." },
   { id:3, text:"¿TODOS LOS BACILLUS CLAUSII SON IGUALES?",     
     answers:[
-      "Sí, todos los probióticos que digan \"Bacillus clausii\" hacen el mismo efecto en el intestino, sin importar el fabricante.",
-      "No, aunque te digan lo contrario. Solo Enterogermina con Bacillus clausii y sus 4 cepas específicas tiene evidencia científica de su efectividad, cumple con la cantidad de billones de probióticos que dice su etiqueta y no presenta contaminantes.",
+      "Sí, todos los probióticos que digan \'Bacillus clausii\'hacen el mismo efecto en el intestino, sin importar el fabricante.",
+      "No, aunque te digan lo contrario.<br> Solo Enterogermina con Bacillus clausii y sus 4 cepas específicas tiene evidencia científica de su efectividad, cumple con la cantidad de billones de probióticos que dice su etiqueta y no presenta contaminantes.",
       "Sí. La única diferencia es que cambian el precio dependiendo de la planta donde se producen."
     ],  
     correct:1, exp:"No, aunque te digan lo contrario. Solo Enterogermina con Bacillus clausii y sus 4 cepas específicas tiene evidencia científica de su efectividad, cumple con la cantidad de billones de probióticos que dice su etiqueta y no presenta contaminantes." },
@@ -36,7 +36,7 @@ const QS = [
     answers:[
       "Microorganismos vivos que afectan el intestino y el estómago.",
       "Bacterias buenas que hacen que el cuerpo genere defensas en el intestino.",
-      "Microorganismos vivos o bacterias benéficas que ayudan integralmente a la salud intestinal"
+      "Microorganismos vivos o bacterias benéficas que ayudan integralmente a la salud intestinal."
     ],       
     correct:2, exp:"Microorganismos vivos o bacterias benéficas que ayudan integralmente a la salud intestinal" }
 ];
@@ -44,7 +44,7 @@ const QS = [
 const COOLDOWN_MS  = 90000;
 const SPIN_DUR_MS  = 3400;
 
-// Adjust if your SVG segments don't start at 12 o'clock (0°)
+
 const OFFSET_DEG   = 0;
 
 let state = {
@@ -268,7 +268,7 @@ function showQuestion(q) {
   document.getElementById('plbl').textContent = `${answered + 1} / ${QS.length}`;
   goTo('s-question');
 
-  // ── Question idle: if no answer in 90s, return to home ──
+  // ── Question idle: if no answer in 60s, return to home ──
   clearTimeout(state._questionIdleTimer);
   state._questionIdleTimer = setTimeout(() => {
     clearTimeout(state._correctTimer);
@@ -287,6 +287,13 @@ function pickAnswer(idx) {
   clearTimeout(state._questionIdleTimer);
 
   const correct = idx === q.correct;
+
+  // ── Play audio immediately on answer ──
+  if (correct) {
+    AudioManager.play('correct');
+  } else {
+    AudioManager.play('wrong');
+  }
 
   // ── Animate answer feedback ──
   // rAF ensures browser registers the base state before adding classes
@@ -312,8 +319,7 @@ function pickAnswer(idx) {
       state.cds[q.id] = Date.now() + COOLDOWN_MS;
       document.getElementById('c-atxt').textContent = q.answers[q.correct];
       document.getElementById('c-exp').textContent  = q.exp;
-      /*updateScoreboard();*/
-      AudioManager.play('correct');
+    
       // Alternate correct character image
       const cNum = state.correctIdx % 2 + 1;
       document.querySelector('.character_3 img').src = `imgs/m_correcto${cNum}.webp`;
@@ -321,14 +327,13 @@ function pickAnswer(idx) {
       goTo('s-correct');
       // Auto-advance to final screen after 5 seconds
       clearTimeout(state._correctTimer);
-      state._correctTimer = setTimeout(showFinal, 8000);
+      state._correctTimer = setTimeout(showFinal, 4000);
     } else {
       state.score.w++;
       state.cds[q.id] = Date.now() + COOLDOWN_MS;
       document.getElementById('w-atxt').textContent = q.answers[q.correct];
       document.getElementById('w-exp').textContent  = q.exp;
-      /*updateScoreboard();*/
-      AudioManager.play('wrong');
+      
       // Alternate incorrect character image
       const wNum = state.incorrectIdx % 2 + 1;
       document.querySelector('.character_4 img').src = `imgs/m_incorrecto${wNum}.webp`;
@@ -336,7 +341,7 @@ function pickAnswer(idx) {
       goTo('s-incorrect');
       // Auto-advance to roulette after 10 seconds
       clearTimeout(state._incorrectTimer);
-      state._incorrectTimer = setTimeout(goRoulette, 12000);
+      state._incorrectTimer = setTimeout(goRoulette, 10000);
     }
   }, 1200);
 }
@@ -356,9 +361,6 @@ function showFinal() {
   clearTimeout(state._incorrectTimer);
   AudioManager.stop('bg_music');
   AudioManager.play('final_music');
- /* document.getElementById('f-c').textContent = state.score.c;
-  document.getElementById('f-w').textContent = state.score.w;
-  document.getElementById('f-t').textContent = totalScore();*/
   goTo('s-final');
 }
 
@@ -383,7 +385,6 @@ function resetGame() {
   wheelDeg = 0;
   document.getElementById('wheel').style.transform = 'translate(-50%,-50%) rotate(0deg)';
   document.getElementById('wheel-btn').classList.remove('spinning');
-  /*updateScoreboard();*/
   goTo('s-roulette');
 }
 
@@ -411,5 +412,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('pointerdown', startBgMusic);
     document.addEventListener('keydown', startBgMusic);
   }
-  /*updateScoreboard();*/
+ 
 });
